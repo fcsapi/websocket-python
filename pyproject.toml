@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fcsapi-websocket-python"
-version = "1.0.3"
+version = "1.0.5"
 description = "Real-time WebSocket client for Python library for Forex, Cryptocurrency, and Stock market data from FCS API"
 readme = "README.md"
 license = {text = "MIT"}
@@ -61,11 +61,12 @@ Documentation = "https://fcsapi.com/document/stock-api"
 Repository = "https://github.com/fcsapi/websocket-python"
 Issues = "https://github.com/fcsapi/websocket-python/issues"
 
-[tool.setuptools]
-packages = []
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["fcsapi*", "backend*", "frontend*"]
 
 [tool.setuptools.package-data]
-"*" = ["fcs-client-lib.js"]
+"*" = ["*.js", "*.py", "*.html"]
 
 [tool.black]
 line-length = 100
