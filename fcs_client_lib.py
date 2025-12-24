@@ -58,6 +58,7 @@ class FCSClient:
         self.reconnect_delay = 3  # seconds (3000ms in JS)
         self.manual_close = False
         self.is_connected = False
+        self.show_logs = False  # Control console output (like JS showLogs)
 
         # Event callbacks
         self._onconnected = None
@@ -204,11 +205,13 @@ class FCSClient:
             timeframe (str): Timeframe (e.g., '1', '5', '15', '1H', '1D')
         """
         if not symbol or not timeframe:
-            print('[FCS] Symbol and timeframe are required to join')
+            if self.show_logs:
+                print('[FCS] Symbol and timeframe are required to join')
             return
 
         if ':' not in symbol:
-            print('[FCS] Symbol must include exchange prefix, e.g., "BINANCE:BTCUSDT"')
+            if self.show_logs:
+                print('[FCS] Symbol must include exchange prefix, e.g., "BINANCE:BTCUSDT"')
             return
 
         self._send({'type': 'join_symbol', 'symbol': symbol, 'timeframe': timeframe})
@@ -250,20 +253,23 @@ class FCSClient:
             self.socket.send(json.dumps(data))
             return True
         except Exception as e:
-            print(f'[FCS] Send error: {e}')
+            if self.show_logs:
+                print(f'[FCS] Send error: {e}')
             return False
 
     def _handle_open(self, ws):
         """Handle WebSocket connection open."""
         self.manual_close = False
-        print('[FCS] WebSocket connection opened')
+        if self.show_logs:
+            print('[FCS] WebSocket connection opened')
 
     def _handle_message(self, ws, message):
         """Handle incoming WebSocket message."""
         try:
             data = json.loads(message)
         except json.JSONDecodeError as e:
-            print(f'[FCS] Invalid message from server: {e}')
+            if self.show_logs:
+                print(f'[FCS] Invalid message from server: {e}')
             return
 
         # Handle ping
@@ -291,7 +297,8 @@ class FCSClient:
             if symbol and timeframe:
                 key = f"{symbol.upper()}_{timeframe}"
                 self.active_subscriptions[key] = {'symbol': symbol, 'timeframe': timeframe}
-                print(f'[FCS] Subscribed to {symbol} {timeframe}')
+                if self.show_logs:
+                    print(f'[FCS] Subscribed to {symbol} {timeframe}')
 
         # Call user's message handler
         if callable(self._onmessage):
@@ -299,13 +306,15 @@ class FCSClient:
 
     def _handle_error(self, ws, error):
         """Handle WebSocket error."""
-        print(f'[FCS] Error: {error}')
+        if self.show_logs:
+            print(f'[FCS] Error: {error}')
         if callable(self._onerror):
             self._onerror(error)
 
     def _handle_close(self, ws, close_status_code, close_msg):
         """Handle WebSocket close."""
-        print(f'[FCS] Disconnected. Code: {close_status_code}, Reason: {close_msg}')
+        if self.show_logs:
+            print(f'[FCS] Disconnected. Code: {close_status_code}, Reason: {close_msg}')
         self.is_connected = False
         self._stop_heartbeat = True
 
@@ -316,7 +325,8 @@ class FCSClient:
         if not self.manual_close and self.count_reconnects < self.reconnect_limit:
             self.count_reconnects += 1
             self.is_reconnect = True
-            print(f'[FCS] Reconnecting in {self.reconnect_delay}s... (attempt {self.count_reconnects}/{self.reconnect_limit})')
+            if self.show_logs:
+                print(f'[FCS] Reconnecting in {self.reconnect_delay}s... (attempt {self.count_reconnects}/{self.reconnect_limit})')
             time.sleep(self.reconnect_delay)
             self.connect()
             self.run_forever()

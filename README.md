@@ -10,9 +10,8 @@ Real-time WebSocket client library for **Forex**, **Cryptocurrency**, and **Stoc
 
 - **Real-time WebSocket** - Live price updates via WebSocket connection
 - **Multi-Market Support** - Forex, Crypto, and Stock data
-- **Frontend & Backend** - Use in browser or pure Python
 - **Auto-Reconnect** - Handles connection drops automatically
-- **No Dependencies** - Frontend uses Python built-in modules
+- **Simple API** - Easy to use with decorators
 
 ## Installation
 
@@ -20,72 +19,26 @@ Real-time WebSocket client library for **Forex**, **Cryptocurrency**, and **Stoc
 pip install fcsapi-websocket-python
 ```
 
-For backend usage, also install:
+## Examples
+
+To download example files, clone the repository:
+
 ```bash
-pip install websocket-client
+git clone https://github.com/fcsapi/websocket-python
+cd websocket-python/examples
+python simple_example.py
 ```
 
-## Demo
+## Demo API Key
 
 Use demo API key for testing: `fcs_socket_demo`
 
 ---
 
-## Frontend (Browser-based)
-
-For web applications that display real-time prices in the browser.
-
-### Structure
-```
-frontend/
-├── fcs-client-lib.js      # JavaScript WebSocket client
-└── examples/
-    ├── crypto_example.py  # Crypto prices in browser
-    ├── forex_example.py   # Forex prices in browser
-    └── stock_example.py   # Stock prices in browser
-```
-
-### Quick Start
-
-```bash
-cd frontend/examples
-python crypto_example.py
-# Open http://localhost:5000
-```
-
-### How it works
-- Python serves HTML page with embedded JavaScript
-- JavaScript (`fcs-client-lib.js`) connects to WebSocket
-- Real-time updates displayed in browser
-
----
-
-## Backend (Pure Python)
-
-For server-side applications, bots, or scripts that need real-time data without a browser.
-
-### Structure
-```
-backend/
-├── fcs_client_lib.py      # Python WebSocket client
-└── examples/
-    ├── crypto_example.py  # Terminal crypto prices
-    ├── forex_example.py   # Terminal forex prices
-    └── stock_example.py   # Terminal stock prices
-```
-
-### Quick Start
-
-```bash
-pip install websocket-client
-cd backend/examples
-python crypto_example.py
-```
-
-### Usage
+## Quick Start
 
 ```python
-from backend import FCSClient
+from fcs_client_lib import FCSClient
 
 client = FCSClient('YOUR_API_KEY')
 
@@ -99,32 +52,145 @@ client.join('BINANCE:BTCUSDT', '1D')
 client.run_forever()
 ```
 
-### Backend API
+---
+
+## Usage Examples
+
+### Example 1: Simple Crypto Price
 
 ```python
-from backend import FCSClient
+from fcs_client_lib import FCSClient
 
-# Create client
-client = FCSClient(api_key, url=None)
+client = FCSClient('fcs_socket_demo')
 
-# Connect
-client.connect()
-client.run_forever(blocking=True)  # blocking=False for background
-
-# Subscribe
-client.join('BINANCE:BTCUSDT', '1D')
-client.leave('BINANCE:BTCUSDT', '1D')
-client.remove_all()
-
-# Disconnect
-client.disconnect()
-
-# Event callbacks (decorators)
-@client.on_connected
 @client.on_message
+def on_message(data):
+    if data.get('type') == 'price':
+        symbol = data.get('symbol')
+        price = data['prices'].get('c')  # Close price
+        print(f'{symbol}: ${price}')
+
+client.connect()
+client.join('BINANCE:BTCUSDT', '1D')
+client.run_forever()
+```
+
+### Example 2: Multiple Forex Pairs with Spread
+
+```python
+from fcs_client_lib import FCSClient
+
+client = FCSClient('fcs_socket_demo')
+
+@client.on_connected
+def on_connected():
+    print('Connected! Subscribing to forex pairs...')
+    client.join('FX:EURUSD', '1D')
+    client.join('FX:GBPUSD', '1D')
+    client.join('FX:USDJPY', '1D')
+
+@client.on_message
+def on_message(data):
+    if data.get('type') == 'price':
+        p = data['prices']
+        symbol = data.get('symbol')
+        ask = p.get('a')
+        bid = p.get('b')
+        spread = round((float(ask) - float(bid)) * 10000, 1) if ask and bid else '--'
+        print(f'{symbol}: Ask={ask} Bid={bid} Spread={spread} pips')
+
+client.connect()
+client.run_forever()
+```
+
+### Example 3: Background Thread (Non-blocking)
+
+```python
+from fcs_client_lib import FCSClient
+import time
+
+client = FCSClient('fcs_socket_demo')
+
+@client.on_message
+def on_message(data):
+    if data.get('type') == 'price':
+        print(f"Price update: {data.get('symbol')}")
+
+# Connect and run in background thread
+client.connect()
+client.run_forever(blocking=False)
+
+# Subscribe after connection
+time.sleep(2)  # Wait for connection
+client.join('BINANCE:ETHUSDT', '1D')
+
+# Your other code continues here...
+print('Main thread continues...')
+time.sleep(60)  # Keep running for 60 seconds
+client.disconnect()
+```
+
+---
+
+## API Reference
+
+### Create Client
+
+```python
+from fcs_client_lib import FCSClient
+
+client = FCSClient(api_key, url=None)
+client.show_logs = True  # Enable console logs (default: False)
+```
+
+### Connection
+
+```python
+client.connect()                    # Connect to server
+client.run_forever(blocking=True)   # Start receiving (blocking=False for background)
+client.disconnect()                 # Disconnect from server
+```
+
+### Subscription
+
+```python
+client.join('BINANCE:BTCUSDT', '1D')   # Subscribe to symbol
+client.leave('BINANCE:BTCUSDT', '1D')  # Unsubscribe from symbol
+client.remove_all()                     # Unsubscribe from all
+```
+
+### Event Callbacks (Decorators)
+
+```python
+@client.on_connected
+def on_connected():
+    print('Connected!')
+
+@client.on_message
+def on_message(data):
+    print(data)
+
 @client.on_close
+def on_close(code, msg):
+    print(f'Closed: {code}')
+
 @client.on_error
+def on_error(error):
+    print(f'Error: {error}')
+
 @client.on_reconnect
+def on_reconnect():
+    print('Reconnected!')
+```
+
+### Properties
+
+```python
+client.is_connected          # Connection status (bool)
+client.active_subscriptions  # Current subscriptions (dict)
+client.reconnect_delay       # Reconnect delay in seconds (default: 3)
+client.reconnect_limit       # Max reconnect attempts (default: 5)
+client.show_logs             # Enable/disable console logs (default: False)
 ```
 
 ---
@@ -169,6 +235,8 @@ client.disconnect()
     }
 }
 ```
+
+---
 
 ## Get API Key
 
