@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fcsapi-websocket-python"
+version = "1.0.3"
+description = "Real-time WebSocket client for Python library for Forex, Cryptocurrency, and Stock market data from FCS API"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "FCS API", email = "support@fcsapi.com"}
+]
+keywords = [
+    "fcs",
+    "fcsapi",
+    "forex",
+    "cryptocurrency",
+    "crypto",
+    "stock",
+    "realtime",
+    "websocket",
+    "market-data",
+    "trading",
+    "bitcoin",
+    "ethereum"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.optional-dependencies]
+flask = ["flask>=2.0.0"]
+django = ["django>=3.2"]
+fastapi = ["fastapi>=0.68.0", "uvicorn>=0.15.0"]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0"
+]
+
+[project.urls]
+Homepage = "https://fcsapi.com"
+Documentation = "https://fcsapi.com/document/stock-api"
+Repository = "https://github.com/fcsapi/websocket-python"
+Issues = "https://github.com/fcsapi/websocket-python/issues"
+
+[tool.setuptools]
+packages = []
+
+[tool.setuptools.package-data]
+"*" = ["fcs-client-lib.js"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
