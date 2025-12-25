@@ -4,7 +4,7 @@ Real-time WebSocket client library for **Forex**, **Cryptocurrency**, and **Stoc
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![PyPI](https://img.shields.io/pypi/v/fcsapi-websocket-python.svg)](https://pypi.org/project/fcsapi-websocket-python/)
+[![PyPI](https://img.shields.io/pypi/v/fcsapi-websocket.svg)](https://pypi.org/project/fcsapi-websocket/)
 
 ## Features
 
@@ -16,7 +16,7 @@ Real-time WebSocket client library for **Forex**, **Cryptocurrency**, and **Stoc
 ## Installation
 
 ```bash
-pip install fcsapi-websocket-python
+pip install fcsapi-websocket
 ```
 
 ## Examples
